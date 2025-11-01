@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TABLE 1. Inter-Unit Spacing Recommendations For Oil And Chemical Plants</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1100px; margin: auto; }
+    .matrix-img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background: #f5f5f5; position: sticky; top: 0; }
+    #search { margin-top: 10px; width: 100%; padding: 8px; }
+    .note { color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>TABLE 1. Inter-Unit Spacing Recommendations For Oil And Chemical Plants</h1>
+
+  <!-- If you have the matrix image in the repo, replace the src path below. -->
+  <p><img class="matrix-img" src="/images/gap-spacing-matrix.png" alt="Inter-Unit Spacing Matrix (upload images/gap-spacing-matrix.png to repo)"></p>
+
+  <p class="note">Note: Cells may contain special marks ("/", "*", numbered footnotes). Refer to the source standard for details. Distances are shown in feet.</p>
+
+  <p>Download: <a id="download-xlsx" href="/gap-2.5.2-full.xlsx" download>gap-2.5.2-full.xlsx</a> (if present)</p>
+
+  <input id="search" placeholder="Filter by equipment name or distance (e.g. 'service' or '50')">
+
+  <table id="spacing-table" aria-describedby="table-desc">
+    <thead>
+      <tr><th>Equipment A</th><th>Equipment B</th><th>Distance</th><th>Note</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const jsonUrl = '/assets/data/equipment-distances.json';
+    async function loadTable() {
+      try {
+        const res = await fetch(jsonUrl);
+        const data = await res.json();
+        const tbody = document.querySelector('#spacing-table tbody');
+        tbody.innerHTML = '';
+        Object.keys(data).forEach(k => {
+          if (k.startsWith('//')) return;
+          const [a,b] = k.split('|');
+          const row = data[k];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${a}</td><td>${b}</td><td>${row.distance}</td><td>${row.note || ''}</td>`;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Failed to load spacing JSON:', err);
+      }
+    }
+    loadTable();
+
+    document.getElementById('search').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#spacing-table tbody tr').forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
